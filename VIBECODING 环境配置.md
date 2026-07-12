@@ -238,7 +238,15 @@ scoop bucket add opencode https://github.com/opencodelabs/scoop-bucket
 scoop install opencode
 ```
 
-> 这两种方式对课堂来说不是必须的。如果你不是 npm 安装有困难，**请优先走 npm 安装**，后续课堂说明都以 npm 安装为准。
+**方式 C：直接下载安装包（推荐备用）**
+
+如果上面几种方式都失败，可以直接从 OpenCode 官方下载页下载安装包：
+
+1. 打开浏览器，访问 https://opencode.ai/zh/download
+2. 下载 Windows (x64) 版本
+3. 双击下载的安装包，按照提示完成安装
+
+> 课堂默认走 **方式 A（npm 安装）**，如果有困难再尝试方式 B 或 C。
 
 ---
 
@@ -255,12 +263,13 @@ scoop install opencode
    - 创建后**复制并保存**这个 Key（它只出现一次！）
    - 格式类似：`sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
 
-### ⚠️ 两个非常重要的提醒
+### ⚠️ 三个非常重要的提醒
 
 | 编号 | 提醒内容 |
 |------|----------|
 | 🔴 | **API Key 不要截图发到班级群、不要提交到 Git 仓库。** 任何人拿到你的 Key 都能用你的额度。 |
-| 🔴 | **DeepSeek 的新账号通常会有免费额度，但用完后需要充值才能继续使用。** 上课前检查一下账户余额。 |
+| 🔴 | **DeepSeek 的新账号通常有免费额度（约 100 万 tokens/月），但用完后需要充值才能继续使用。** 上课前检查一下账户余额。 |
+| 🔴 | **模型名注意**：请使用 `deepseek-v4-pro` 或 `deepseek-v4-flash`。旧模型名 `deepseek-chat` 和 `deepseek-reasoner` 将于 2026 年 7 月 24 日停用，不要使用。 |
 
 ### 验证 API Key
 
@@ -300,6 +309,15 @@ opencode
 
 > 💡 第一次使用 OpenCode 时，TUI 底部会显示可用的操作命令。如果不小心退出了，重新输入 `opencode` 即可。
 
+### 备选：使用桌面版连接
+
+如果你安装了 OpenCode 桌面版，也可以在图形界面中配置：
+
+1. 打开 OpenCode 桌面版
+2. 点击右下角 **Settings** → **Providers**
+3. 搜索 **DeepSeek**，粘贴你的 API Key，点击连接
+4. 回到主界面，在底部模型选单中选择 `deepseek-v4-pro`
+
 ### 验证连接
 
 在 OpenCode TUI 中输入：
@@ -328,7 +346,7 @@ opencode
 
 TUI 会列出可用的模型。找到并选择 **`deepseek-v4-pro`**（按方向键移动，按回车选择）。
 
-> 如果列表中看不到 `deepseek-v4-pro`，可以输入 `/models` 后再按一次回车刷新模型列表。或者试试 `deepseek-chat` 作为备选。
+> 如果列表中看不到 `deepseek-v4-pro`，试试 `deepseek-v4-flash`。⚠️ 不要使用 `deepseek-chat` 或 `deepseek-reasoner`，这两个旧模型将于 2026 年 7 月 24 日停用。
 
 ### 验证模型已生效
 
@@ -339,6 +357,21 @@ TUI 会列出可用的模型。找到并选择 **`deepseek-v4-pro`**（按方向
 ```
 
 确认当前模型显示为 `deepseek-v4-pro`。
+
+### 测试模型能否正常回复
+
+在 OpenCode TUI 底部的输入框里，输入一个最简单的问候：
+
+```
+你好
+```
+
+如果一切正常，DeepSeek 会在几秒内回复你。这表示：
+- ✅ OpenCode CLI 安装正确
+- ✅ DeepSeek API Key 有效
+- ✅ 模型连接正常
+
+> 如果等了 30 秒还没回复，检查：网络是否正常、API Key 是否正确、DeepSeek 账号是否还有余额。
 
 ---
 
@@ -360,13 +393,24 @@ cd D:\my-project
 opencode
 ```
 
-3. **不要急着让 AI 修改代码**，先做只读提问，了解这个项目：
+3. **理解 OpenCode 的两种工作模式**
+
+OpenCode 有两个核心模式，按 `Tab` 键切换：
+
+| 模式 | 右下角显示 | 能力 | 什么时候用 |
+|---|---|---|---|
+| **Plan 模式** | `Plan` | 只读分析、提问、出计划，**不会改代码** | 刚进入项目、需要了解代码、出开发计划 |
+| **Build 模式** | `Build` | 搜索文件、编写代码、执行命令、**可以改文件** | 确认计划后、正式开始实现 |
+
+> 💡 **课堂铁律：先用 Plan 模式看项目、出计划，确认无误后再切 Build 模式写代码。**
+
+4. **不要急着让 AI 修改代码**，先在 **Plan 模式**下做只读提问，了解这个项目：
 
 ```
 请说明当前目录下有哪些文件，只做分析，不要修改任何文件。
 ```
 
-4. 让 AI 看完项目结构后，如果你确认这个项目可以安全修改，再使用 `/init` 命令让 AI 正式接管项目上下文：
+5. 让 AI 看完项目结构后，如果你确认这个项目可以安全修改，再使用 `/init` 命令让 AI 正式接管项目上下文：
 
 ```
 /init
@@ -374,7 +418,7 @@ opencode
 
 > `/init` 会让 OpenCode 读取项目结构、配置文件，后续 AI 的代码生成会更准确。
 
-5. 之后就可以正常提需求了。例如：
+6. 之后就可以正常提需求了。切到 **Build 模式**，例如：
 
 ```
 这个项目的 README.md 缺少安装步骤，帮我补充安装说明，写在 README.md 里。

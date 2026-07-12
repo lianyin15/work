@@ -64,10 +64,28 @@ project-root/
 
 ## 如何开始
 
-1. 在 `frontend/` 和 `backend/` 目录下搭建各自的项目脚手架
-2. 按 `database/schema.sql` 设计表结构并在本地 MySQL 中执行
-3. 按 `docs/api.md` 确认并记录接口
-4. 完成开发后提交完整的 `README.md`、`agent-log.md`、`docs/`、`database/` 内容
+推荐按以下顺序，配合内置的 Agent Skill 完成项目：
+
+1. **`skill vibecoding-require`** — 明确需求，把想法写成任务契约
+2. **`skill vibecoding-plan`** — 出开发计划，审查后再推进
+3. **`skill vibecoding-build`** — 分步实现：后端 → 前端 → 联调
+4. **`skill vibecoding-verify`** — 验收检查，确认主链路跑通
+
+具体操作：在 `frontend/` 和 `backend/` 目录下搭建各自的脚手架，然后按 Skill 流程分阶段推进。
+
+## 提交物清单
+
+项目完成后必须提交以下内容：
+
+| 提交物 | 说明 |
+|---|---|
+| `frontend/` + `backend/` | 完整可运行的代码 |
+| `database/schema.sql` + `seed.sql` | 建表与初始数据脚本 |
+| `README.md` | 项目说明与完整启动步骤 |
+| `agent-log.md` | Agent 使用过程记录 |
+| `docs/api.md` | 接口文档 |
+| `docs/requirement.md` | 需求说明 |
+| `docs/acceptance.md` | 验收报告 |
 
 ## 实践项目选题
 
