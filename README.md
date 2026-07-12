@@ -13,6 +13,15 @@
 
 > 如果本地环境还未配置好，请先看这个视频，跟着做一遍。
 
+如果需要让 Agent 直接连接并修改本地 MySQL 数据库，请参考：
+[docs/mysql-mcp-guide.md](docs/mysql-mcp-guide.md)
+
+如果需要了解 Agent 如何通过 MCP 只读查看或受控操作 Kubernetes 集群，请参考：
+[docs/kubernetes-mcp-server-guide.md](docs/kubernetes-mcp-server-guide.md)
+
+如果希望 Agent 直接按步骤引导完成 MCP 安装、配置和验证，请让 Agent 读取根目录：
+[MCP_AGENT_RUNBOOK.md](MCP_AGENT_RUNBOOK.md)
+
 ## 开发工作流 Skill
 
 本项目内置了 4 个 Agent Skill，对应 VIBECODING 课程实践的 4 个开发阶段。在 OpenCode 中按阶段依次调用。
@@ -57,8 +66,11 @@ project-root/
     requirement.md   # 需求说明
     api.md           # 接口文档
     acceptance.md    # 验收报告
+    mysql-mcp-guide.md # MySQL MCP 安装与连接指引
+    kubernetes-mcp-server-guide.md # Kubernetes MCP Server 使用导览
   README.md          # 本文件 - 项目说明与启动方式
   AGENTS.md          # Agent 工作规则
+  MCP_AGENT_RUNBOOK.md # Agent 执行 MCP 配置的运行手册
   agent-log.md       # Agent 使用过程记录
 ```
 
