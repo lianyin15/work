@@ -1,33 +1,21 @@
 # 前端项目
 
-## 说明
-
-此目录放置前端项目代码。
-
-你可以选择任意前端框架：
-- React（推荐搭配 Vite）
-- Vue
-- 其他你喜欢的前端技术
-
 ## 启动方式
 
-> 在此处写清你的前端项目的启动命令。
-
-示例（使用 React + Vite）：
 ```bash
 cd frontend
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ## 页面清单
 
 | 页面路径 | 功能说明 |
 |---|---|
-| / | 列表页 |
-| /create | 表单页 |
-| /detail/:id | 详情或记录页 |
-
-## 接口请求
-
-所有后端 API 请求基于真实接口，不在前端使用 Mock 数据作为最终结果。
+| /login | 用户登录 |
+| /register | 用户注册 |
+| / | 任务列表（全部/我的） |
+| /tasks/create | 创建打卡任务 |
+| /tasks/:id | 任务详情与打卡 |
+| /leaderboard | 积分排行榜 |
+| /profile | 个人中心（积分与徽章） |

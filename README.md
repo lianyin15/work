@@ -1,126 +1,91 @@
-# HZCU VIBECODING 课程项目
+# 学习打卡与成就激励系统
 
 ## 项目说明
 
-本项目是 **HZCU VIBECODING** 课程的实践项目骨架模板。
+轻量级学习打卡平台，支持用户创建打卡任务、每日打卡获取积分、自动发放成就徽章、查看积分排行榜。
 
-你可以基于这个骨架，使用任意技术栈完成你的课程项目。
+## 技术栈
 
-## 环境配置
+- **前端**: React 18 + Vite + React Router 6
+- **后端**: Node.js + Express + mysql2
+- **数据库**: MySQL 8.0+
 
-环境配置视频教程（OpenCode 安装、DeepSeek 连接、VS Code 配置）：
-[https://www.bilibili.com/video/BV151T26CE33/](https://www.bilibili.com/video/BV151T26CE33/)
-
-> 如果本地环境还未配置好，请先看这个视频，跟着做一遍。
-
-如果需要让 Agent 直接连接并修改本地 MySQL 数据库，请参考：
-[docs/mysql-mcp-guide.md](docs/mysql-mcp-guide.md)
-
-如果需要了解 Agent 如何通过 MCP 只读查看或受控操作 Kubernetes 集群，请参考：
-[docs/kubernetes-mcp-server-guide.md](docs/kubernetes-mcp-server-guide.md)
-
-如果希望 Agent 直接按步骤引导完成 MCP 安装、配置和验证，请让 Agent 读取根目录：
-[MCP_AGENT_RUNBOOK.md](MCP_AGENT_RUNBOOK.md)
-
-## 开发工作流 Skill
-
-本项目内置了 4 个 Agent Skill，对应 VIBECODING 课程实践的 4 个开发阶段。在 OpenCode 中按阶段依次调用。
-
-| Skill | 阶段 | 用法 | 说明 |
-|---|---|---|---|
-| `vibecoding-require` | 1️⃣ 需求明确 | `skill vibecoding-require` | 把模糊想法写成有边界、可验收的任务契约 |
-| `vibecoding-plan` | 2️⃣ 生成计划并审查 | `skill vibecoding-plan` | 先出完整 Plan，人工审查后再允许写代码 |
-| `vibecoding-build` | 3️⃣ 实现 | `skill vibecoding-build` | 后端→前端→联调，分步推进，每步只改对应目录 |
-| `vibecoding-verify` | 4️⃣ 验收 | `skill vibecoding-verify` | 页面/接口/数据库三方同时验证 |
-
-### 使用流程
-
-在项目目录下启动 OpenCode 后，按阶段依次调用：
-
-```
-# 阶段 1：明确需求
-skill vibecoding-require
-
-# 阶段 2：生成开发计划（确认需求后再调用）
-skill vibecoding-plan
-
-# 阶段 3：开始实现（确认计划后再调用）
-skill vibecoding-build
-
-# 阶段 4：验收检查（项目完成后调用）
-skill vibecoding-verify
-```
-
-Skill 文件位于 `.agents/skills/` 目录下，可直接查看每个 Skill 的详细指令。
-
-## 目录结构
+## 项目结构
 
 ```
 project-root/
-  frontend/          # 前端项目（React / Vue / 其他均可）
-  backend/           # 后端项目（Spring Boot / Express / Django / 其他均可）
+  frontend/          # React 前端项目
+  backend/           # Express 后端项目
   database/
-    schema.sql       # 数据库建表脚本（必填）
-    seed.sql         # 数据库初始数据脚本（必填）
+    schema.sql       # 数据库建表脚本
+    seed.sql         # 初始数据脚本（徽章配置）
   docs/
     requirement.md   # 需求说明
     api.md           # 接口文档
     acceptance.md    # 验收报告
-    mysql-mcp-guide.md # MySQL MCP 安装与连接指引
-    kubernetes-mcp-server-guide.md # Kubernetes MCP Server 使用导览
-  README.md          # 本文件 - 项目说明与启动方式
-  AGENTS.md          # Agent 工作规则
-  MCP_AGENT_RUNBOOK.md # Agent 执行 MCP 配置的运行手册
-  agent-log.md       # Agent 使用过程记录
 ```
 
-## 如何开始
+## 启动步骤
 
-推荐按以下顺序，配合内置的 Agent Skill 完成项目：
+### 1. 创建数据库
 
-1. **`skill vibecoding-require`** — 明确需求，把想法写成任务契约
-2. **`skill vibecoding-plan`** — 出开发计划，审查后再推进
-3. **`skill vibecoding-build`** — 分步实现：后端 → 前端 → 联调
-4. **`skill vibecoding-verify`** — 验收检查，确认主链路跑通
+```sql
+-- 在 MySQL 中执行
+source database/schema.sql
+source database/seed.sql
+```
 
-具体操作：在 `frontend/` 和 `backend/` 目录下搭建各自的脚手架，然后按 Skill 流程分阶段推进。
+### 2. 启动后端
 
-## 提交物清单
+```bash
+cd backend
+npm install
+# 如需自定义数据库连接，设置环境变量：
+#   DB_HOST=127.0.0.1
+#   DB_PORT=3306
+#   DB_USER=root
+#   DB_PASSWORD=your_password
+#   DB_NAME=checkin_app
+npm start
+```
 
-项目完成后必须提交以下内容：
+后端默认运行在 `http://localhost:3000`。
 
-| 提交物 | 说明 |
+### 3. 启动前端
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+前端默认运行在 `http://localhost:5173`，已配置代理转发 `/api` 到后端。
+
+### 4. 打开浏览器
+
+访问 `http://localhost:5173`，注册账号后即可使用。
+
+## 数据库表结构
+
+| 表名 | 说明 |
 |---|---|
-| `frontend/` + `backend/` | 完整可运行的代码 |
-| `database/schema.sql` + `seed.sql` | 建表与初始数据脚本 |
-| `README.md` | 项目说明与完整启动步骤 |
-| `agent-log.md` | Agent 使用过程记录 |
-| `docs/api.md` | 接口文档 |
-| `docs/requirement.md` | 需求说明 |
-| `docs/acceptance.md` | 验收报告 |
+| users | 用户（用户名、密码、昵称、积分） |
+| tasks | 打卡任务（标题、描述、起止日期） |
+| checkins | 打卡记录（关联任务和用户、日期、积分） |
+| badges | 徽章配置（名称、图标、获得条件） |
+| user_badges | 用户已获得徽章 |
 
-## 实践项目选题
+## 积分规则
 
-所有项目统一要求：前后端分离、本地启动、MySQL 持久化、至少 3 个页面、5 个接口、2 张表。
+- 连续第 n 天打卡 = n 积分
+- 中断后重新从 1 分开始
 
-| 难度 | 题目 | 描述 | 核心功能 |
-|---|---|---|---|
-| 入门 | 校园失物招领平台 | 线上统一失物招领入口，拾获者发布、失主检索认领 | 发布拾物/失物信息；列表与关键词搜索；认领申请与处理；状态流转 |
-| 入门 | 学习打卡与成就激励系统 | 轻量打卡平台，积分与徽章激励 | 创建打卡任务；每日打卡；连续天数统计；积分计算；成就徽章自动发放 |
-| 中级 | 课程设计组队招募系统 | 课程组队线上招募与审核平台 | 发布组队需求；技能标签维护；队伍搜索；入队申请与队长审核 |
-| 中级 | 实验报告匿名互评系统 | 在线提交实验报告并匿名互评 | 教师创建互评任务；学生提交报告；系统分配互评；匿名评分；成绩汇总 |
-| 高级 | 实验室设备预约与耗材管理 | 设备预约冲突检测与耗材库存管理 | 设备预约与冲突检测；预约审核；耗材入库/领用；库存预警 |
+## 徽章列表
 
-## 技术栈
-
-本模板不做技术栈限制。你可以自由选择任意的前端、后端、数据库组合，只要能满足课程验收标准。
-
-## 课程验收标准
-
-- 前端可以打开并操作
-- 后端可以启动并响应请求
-- 数据库真实连接并持久化数据
-- 主业务链路可以完整操作
-- 页面操作后数据库有变化
-- README 能指导别人启动
-- agent-log.md 能说明 Agent 使用过程
+| 徽章 | 条件 |
+|---|---|
+| 🌱 首次打卡 | 完成第一次打卡 |
+| 🔥 持之以恒 | 连续打卡 7 天 |
+| 💎 坚如磐石 | 连续打卡 30 天 |
+| ⭐ 打卡达人 | 累计打卡 50 次 |
+| 👑 打卡王者 | 累计打卡 100 次 |
