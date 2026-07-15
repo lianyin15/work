@@ -32,7 +32,7 @@ CREATE TABLE checkins (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_checkins_task FOREIGN KEY (task_id) REFERENCES tasks(id),
     CONSTRAINT fk_checkins_user FOREIGN KEY (user_id) REFERENCES users(id),
-    UNIQUE KEY uk_task_date (task_id, checkin_date)
+    UNIQUE KEY uk_task_user_date (task_id, user_id, checkin_date)
 );
 
 CREATE TABLE badges (
@@ -53,3 +53,41 @@ CREATE TABLE user_badges (
     CONSTRAINT fk_ub_badge FOREIGN KEY (badge_id) REFERENCES badges(id),
     UNIQUE KEY uk_user_badge (user_id, badge_id)
 );
+
+-- ====================================
+-- 迁移：将旧唯一索引 uk_task_date 升级为 uk_task_user_date
+-- 新库已包含正确索引，此脚本仅对旧库生效
+-- ====================================
+SET @has_old_index = (
+    SELECT COUNT(*)
+    FROM information_schema.statistics
+    WHERE table_schema = DATABASE()
+      AND table_name = 'checkins'
+      AND index_name = 'uk_task_date'
+);
+
+SET @drop_old_index_sql = IF(
+    @has_old_index > 0,
+    'ALTER TABLE checkins DROP INDEX uk_task_date',
+    'SELECT 1'
+);
+PREPARE drop_old_index_stmt FROM @drop_old_index_sql;
+EXECUTE drop_old_index_stmt;
+DEALLOCATE PREPARE drop_old_index_stmt;
+
+SET @has_new_index = (
+    SELECT COUNT(*)
+    FROM information_schema.statistics
+    WHERE table_schema = DATABASE()
+      AND table_name = 'checkins'
+      AND index_name = 'uk_task_user_date'
+);
+
+SET @add_new_index_sql = IF(
+    @has_new_index = 0,
+    'ALTER TABLE checkins ADD UNIQUE KEY uk_task_user_date (task_id, user_id, checkin_date)',
+    'SELECT 1'
+);
+PREPARE add_new_index_stmt FROM @add_new_index_sql;
+EXECUTE add_new_index_stmt;
+DEALLOCATE PREPARE add_new_index_stmt;

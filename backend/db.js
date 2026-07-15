@@ -7,6 +7,7 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD || '123456',
   database: process.env.DB_NAME || 'checkin_app',
   charset: 'utf8mb4',
+  dateStrings: ['DATE'],
   waitForConnections: true,
   connectionLimit: 10,
 });

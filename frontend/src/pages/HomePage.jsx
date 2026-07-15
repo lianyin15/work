@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchWithAuth } from '../utils/api';
+import { formatDate } from '../utils/date';
 
 export default function HomePage() {
   const { getToken } = useAuth();
@@ -39,7 +40,10 @@ export default function HomePage() {
                 <div className="task-item-title">{task.title}</div>
                 <div className="task-item-meta">
                   <span>创建者: {task.creator_name}</span>
-                  <span>{task.start_date}{task.end_date ? ` ~ ${task.end_date}` : ''}</span>
+                  <span>
+                    {formatDate(task.start_date)}
+                    {task.end_date ? ` ~ ${formatDate(task.end_date)}` : ''}
+                  </span>
                   <span>打卡 {task.checkin_count} 次</span>
                 </div>
               </div>

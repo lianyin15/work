@@ -67,10 +67,16 @@ app.get('/api/users/me', auth, async (req, res) => {
 app.get('/api/tasks', auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT t.*, u.nickname AS creator_name,
-        (SELECT COUNT(*) FROM checkins c WHERE c.task_id = t.id AND c.user_id = t.user_id) AS checkin_count
+      `SELECT t.id, t.user_id, t.title, t.description, t.start_date, t.end_date,
+        CASE
+          WHEN t.is_active = 1 AND (t.end_date IS NULL OR t.end_date >= CURDATE()) THEN 1
+          ELSE 0
+        END AS is_active,
+        t.created_at, u.nickname AS creator_name,
+        (SELECT COUNT(*) FROM checkins c WHERE c.task_id = t.id AND c.user_id = ?) AS checkin_count
        FROM tasks t JOIN users u ON t.user_id = u.id
-       ORDER BY t.created_at DESC`
+       ORDER BY t.created_at DESC`,
+      [req.userId]
     );
     res.json(rows);
   } catch (err) {
@@ -82,11 +88,17 @@ app.get('/api/tasks', auth, async (req, res) => {
 app.get('/api/tasks/mine', auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT t.*,
-        (SELECT COUNT(*) FROM checkins c WHERE c.task_id = t.id AND c.user_id = t.user_id) AS checkin_count
-       FROM tasks t WHERE t.user_id = ?
+      `SELECT t.id, t.user_id, t.title, t.description, t.start_date, t.end_date,
+        CASE
+          WHEN t.is_active = 1 AND (t.end_date IS NULL OR t.end_date >= CURDATE()) THEN 1
+          ELSE 0
+        END AS is_active,
+        t.created_at, u.nickname AS creator_name,
+        (SELECT COUNT(*) FROM checkins c WHERE c.task_id = t.id AND c.user_id = ?) AS checkin_count
+       FROM tasks t JOIN users u ON t.user_id = u.id
+       WHERE t.user_id = ?
        ORDER BY t.created_at DESC`,
-      [req.userId]
+      [req.userId, req.userId]
     );
     res.json(rows);
   } catch (err) {
@@ -115,7 +127,12 @@ app.post('/api/tasks', auth, async (req, res) => {
 app.get('/api/tasks/:id', auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT t.*, u.nickname AS creator_name
+      `SELECT t.id, t.user_id, t.title, t.description, t.start_date, t.end_date,
+        CASE
+          WHEN t.is_active = 1 AND (t.end_date IS NULL OR t.end_date >= CURDATE()) THEN 1
+          ELSE 0
+        END AS is_active,
+        t.created_at, u.nickname AS creator_name
        FROM tasks t JOIN users u ON t.user_id = u.id WHERE t.id = ?`,
       [req.params.id]
     );
@@ -131,11 +148,24 @@ app.get('/api/tasks/:id', auth, async (req, res) => {
 
 app.post('/api/checkins/:taskId', auth, async (req, res) => {
   const taskId = parseInt(req.params.taskId);
-  const today = new Date().toISOString().slice(0, 10);
 
   try {
-    const [tasks] = await pool.query('SELECT * FROM tasks WHERE id = ?', [taskId]);
+    const [[dateRow]] = await pool.query("SELECT DATE_FORMAT(CURDATE(), '%Y-%m-%d') AS today");
+    const today = dateRow.today;
+
+    const [tasks] = await pool.query(
+      `SELECT t.*,
+        CASE
+          WHEN t.is_active = 1 AND (t.end_date IS NULL OR t.end_date >= CURDATE()) THEN 1
+          ELSE 0
+        END AS can_checkin
+       FROM tasks t WHERE t.id = ?`,
+      [taskId]
+    );
     if (tasks.length === 0) return res.status(404).json({ error: '任务不存在' });
+    if (!tasks[0].can_checkin) {
+      return res.status(409).json({ error: '任务已结束，无法打卡' });
+    }
 
     const [existing] = await pool.query(
       'SELECT id FROM checkins WHERE task_id = ? AND user_id = ? AND checkin_date = ?',
@@ -159,8 +189,8 @@ app.post('/api/checkins/:taskId', auth, async (req, res) => {
         if (diff === 1) count++;
         else break;
       }
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterday = new Date(`${today}T00:00:00Z`);
+      yesterday.setUTCDate(yesterday.getUTCDate() - 1);
       const yesterdayStr = yesterday.toISOString().slice(0, 10);
       if (dates[0] === yesterdayStr) streak = count + 1;
       else if (dates[0] !== today) streak = 1;
@@ -181,6 +211,9 @@ app.post('/api/checkins/:taskId', auth, async (req, res) => {
     res.status(201).json({ id: result.insertId, checkin_date: today, points, streak });
   } catch (err) {
     console.error(err);
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: '今天已打卡，请勿重复操作' });
+    }
     res.status(500).json({ error: '服务器错误' });
   }
 });
@@ -282,7 +315,17 @@ app.get('/api/leaderboard', async (req, res) => {
 app.get('/api/badges', auth, async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT b.*, ub.earned_at IS NOT NULL AS earned, ub.earned_at
+      `SELECT b.id, b.name, b.description,
+        CASE b.icon
+          WHEN 'star' THEN '🌱'
+          WHEN 'fire' THEN '🔥'
+          WHEN 'diamond' THEN '💎'
+          WHEN 'medal' THEN '⭐'
+          WHEN 'crown' THEN '👑'
+          ELSE b.icon
+        END AS icon,
+        b.condition_type, b.condition_value,
+        ub.earned_at IS NOT NULL AS earned, ub.earned_at
        FROM badges b
        LEFT JOIN user_badges ub ON ub.badge_id = b.id AND ub.user_id = ?
        ORDER BY b.id`,

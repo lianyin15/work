@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchWithAuth, postWithAuth } from '../utils/api';
+import { formatDate } from '../utils/date';
 
 export default function TaskDetailPage() {
   const { id } = useParams();
@@ -61,8 +62,11 @@ export default function TaskDetailPage() {
         <p style={{ color: '#666', marginTop: 8 }}>{task.description || '暂无描述'}</p>
         <div style={{ display: 'flex', gap: 24, marginTop: 16, fontSize: 14, color: '#999' }}>
           <span>创建者: {task.creator_name}</span>
-          <span>开始: {task.start_date}</span>
-          {task.end_date && <span>结束: {task.end_date}</span>}
+          <span>开始: {formatDate(task.start_date)}</span>
+          {task.end_date && <span>结束: {formatDate(task.end_date)}</span>}
+          <span className={`task-badge ${task.is_active ? 'active' : ''}`}>
+            {task.is_active ? '进行中' : '已结束'}
+          </span>
         </div>
       </div>
 
@@ -74,12 +78,14 @@ export default function TaskDetailPage() {
             <div style={{ marginTop: 8, color: '#999', fontSize: 14 }}>已打卡 {stats.total} 天</div>
             <div style={{ marginTop: 16 }}>
               <button
-                className={`btn ${stats.checked_in_today ? 'btn-default' : 'btn-success'}`}
+                className={`btn ${stats.checked_in_today || !task.is_active ? 'btn-default' : 'btn-success'}`}
                 onClick={handleCheckin}
-                disabled={checkingIn || stats.checked_in_today}
+                disabled={checkingIn || stats.checked_in_today || !task.is_active}
                 style={{ fontSize: 16, padding: '12px 32px' }}
               >
-                {stats.checked_in_today ? '今日已打卡 ✓' : (checkingIn ? '打卡中...' : '今日打卡')}
+                {!task.is_active
+                  ? '任务已结束'
+                  : (stats.checked_in_today ? '今日已打卡 ✓' : (checkingIn ? '打卡中...' : '今日打卡'))}
               </button>
             </div>
             {message && (
@@ -99,7 +105,7 @@ export default function TaskDetailPage() {
           <div className="checkin-history">
             {checkins.map(c => (
               <div className="checkin-item" key={c.id}>
-                <span className="checkin-date">{c.checkin_date}</span>
+                <span className="checkin-date">{formatDate(c.checkin_date)}</span>
                 <span className="checkin-pts">+{c.points} 分</span>
               </div>
             ))}
